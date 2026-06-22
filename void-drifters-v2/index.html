@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>VOID DRIFTERS v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game" width="640" height="360"></canvas>
+  <div id="crt"></div>
+  <div id="vignette"></div>
+
+  <div id="ui" class="ui-layer">
+    <div class="hud-top">
+      <div class="hud-card" id="hud-p1">
+        <div class="hud-name">P1 // DRIFTER</div>
+        <div class="bar hp"><div class="bar-fill" id="hp1"></div></div>
+        <div class="hud-sub" id="p1stats">LVL 1</div>
+        <div class="bar sp"><div class="bar-fill" id="sp1"></div></div>
+      </div>
+      <div class="hud-mid">
+        <div id="waveText">СЕКТОР 1-1</div>
+        <div id="timerText" class="hud-timer">02:00</div>
+      </div>
+      <div class="hud-card p2" id="hud-p2">
+        <div class="hud-name">P2 // JOIN</div>
+        <div class="bar hp"><div class="bar-fill" id="hp2"></div></div>
+        <div class="hud-sub" id="p2stats">СТРЕЛКИ ДЛЯ ВХОДА</div>
+        <div class="bar sp"><div class="bar-fill" id="sp2"></div></div>
+      </div>
+    </div>
+    <div class="xp-wrap"><div class="xp-fill" id="xpFill"></div><span id="xpLabel">LV 1</span></div>
+    <div id="toast"></div>
+    <div id="dmg-floats"></div>
+    <!-- Touch controls -->
+    <div id="touch" class="hidden">
+      <div class="stick" id="stickL"><div class="nub" id="nubL"></div></div>
+      <div class="touch-right">
+        <button class="tbtn" id="tDash">DASH</button>
+        <button class="tbtn big" id="tNova">NOVA</button>
+      </div>
+      <div class="stick small" id="stickR"><div class="nub" id="nubR"></div></div>
+    </div>
+  </div>
+
+  <!-- TITLE / HANGAR -->
+  <div class="overlay" id="ov-title">
+    <div class="panel wide">
+      <h1 class="glow-cyan">VOID DRIFTERS <span style="font-size:13px;color:#ffe64c">v2</span></h1>
+      <div class="subtitle">АРКАДНЫЙ РОГАЛАЙТ • 3 БИОМА • МЕТА-ПРОГРЕССИЯ</div>
+      
+      <div class="hangar">
+        <div class="ships" id="shipSelect"></div>
+        <div class="hangar-right">
+          <div class="statbox">
+            <b>ФРАГМЕНТЫ: <span id="fragsCount">0</span> ⬢</b><br>
+            <small>Падают с боссов. Трать в Ангаре.</small>
+            <div id="metaUpgrades" style="margin-top:10px"></div>
+          </div>
+          <div class="statbox">
+            <b>РЕКОРДЫ</b>
+            <div id="recordsList" style="font-size:7px;margin-top:6px;line-height:1.9"></div>
+          </div>
+          <div style="margin-top:10px">
+            <button class="btn" id="btnPlay">ВЫЛЕТ [ENTER]</button>
+            <button class="btn pink" id="btnCoop">КООП 2P</button>
+            <button class="btn ghost" id="btnDaily">DAILY RUN</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-grid">
+        <div><b style="color:#3ef0ff">P1 ПК</b><br>WASD / Мышь<br>ЛКМ - огонь • Shift - дэш • E - Нова • Q - смена оружия</div>
+        <div><b style="color:#ff3e9a">P2</b><br>Стрелки / IJKL<br>Numpad0 - огонь • RShift - дэш • Enter - Нова</div>
+        <div><b>ГЕЙМПАД / ТАЧ</b><br>Полная поддержка. На телефоне включатся стики автоматически.</div>
+        <div><small>M - музыка • F - фуллскрин • P - пауза<br>12 оружий • 28 перков • 5 боссов • Дроны</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL UP -->
+  <div class="overlay hidden" id="ov-levelup">
+    <div class="panel wide" style="border-color:#ffe64c">
+      <h2>LEVEL UP // ВЫБОР МОДУЛЯ</h2>
+      <div class="subtitle" id="luSubtitle"></div>
+      <div class="cards" id="upgradeCards"></div>
+      <div class="lu-footer"><span>1 / 2 / 3 - быстрый выбор • R - реролл (1 раз)</span><span id="rerollInfo"></span></div>
+    </div>
+  </div>
+
+  <!-- SHOP / between sectors -->
+  <div class="overlay hidden" id="ov-shop">
+    <div class="panel">
+      <h2 style="color:#ffe64c">ДОК-СТАНЦИЯ</h2>
+      <div class="subtitle">Сектор зачищен. Пополните запасы.</div>
+      <div id="shopItems" class="cards"></div>
+      <button class="btn" id="btnNextSector" style="margin-top:16px">ДАЛЬШЕ → [SPACE]</button>
+    </div>
+  </div>
+
+  <!-- PAUSE / OVER -->
+  <div class="overlay hidden" id="ov-over">
+    <div class="panel" id="overPanel">
+      <h2 id="overTitle">SHIP DESTROYED</h2>
+      <div class="subtitle" id="overStats"></div>
+      <div id="overRewards" style="font-size:9px;color:#ffe64c;margin:10px 0"></div>
+      <button class="btn" id="btnRetry">РЕСТАРТ [R]</button>
+      <button class="btn ghost" id="btnToHangar">В АНГАР</button>
+    </div>
+  </div>
+
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
